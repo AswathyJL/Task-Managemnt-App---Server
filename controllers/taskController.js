@@ -8,7 +8,7 @@ exports.addTaskController = async(req,res)=>{
     const userId = req.userId
     // console.log(userId);
 
-    const {title,startDate,endDate,description,status,progress} = req.body
+    const {title,startDate,endDate,description,progress} = req.body
     // console.log(title,startDate,endDate,description,status,progress);
     try {
 
@@ -17,6 +17,20 @@ exports.addTaskController = async(req,res)=>{
             return res
             .status(400)
             .json({ message: "endDate must be after or on startDate." });
+        }
+
+        // Automatically determine the status based on progress and endDate
+        let status;
+        const currentDate = new Date();
+        if (progress === 0) {
+            status = "Not Yet Started";
+        } else if (progress > 0 && progress < 100) {
+            status = "Ongoing";
+        } else if (progress === 100) {
+            status = "Completed";
+        }
+        if (new Date(endDate) < currentDate && progress < 100) {
+            status = "Pending"; // Overrides if end date has passed and progress is incomplete
         }
 
         // Create the task
@@ -44,7 +58,7 @@ exports.editTaskController = async (req, res) => {
     console.log(`Inside editTaskController`);
     const { userId } = req;  // userId from the authenticated user
     const { id } = req.params;
-    const { title, startDate, endDate, description, status, progress } = req.body;
+    const { title, startDate, endDate, description, progress } = req.body;
 
     console.log("Task ID:", id);
     console.log("User ID:", userId);
@@ -61,6 +75,35 @@ exports.editTaskController = async (req, res) => {
             return res.status(400).json({ message: "Invalid task ID" });
         }
 
+        let status;
+        let updatedProgress = parseInt(progress); // Ensure progress is a number
+        const currentDate = new Date();
+
+        if (updatedProgress === 0) {
+            status = "Not Yet Started";
+        } else if (updatedProgress > 0 && updatedProgress < 100) {
+            status = "Ongoing";
+        } else if (updatedProgress === 100) {
+            status = "Completed";
+        }
+
+        // Check if the end date has passed
+        if (new Date(endDate) < currentDate) {
+            if (updatedProgress < 100) {
+                status = "Pending"; // Incomplete after due date
+            } else if (updatedProgress === 100) {
+                status = "Completed"; // Overrides "Pending" if task is now complete
+            }
+        } else if (updatedProgress === 100) {
+            // If end date hasn't passed but progress is 100
+            status = "Completed";
+        }
+
+        // Ensure progress is 100 if status is "Completed"
+        if (status === "Completed") {
+            updatedProgress = 100;
+        }
+
         // Find the task and ensure it's associated with the correct userId
         const updateTask = await tasks.findOneAndUpdate(
             { _id: id, userId },  // Check both task ID and userId
@@ -70,7 +113,7 @@ exports.editTaskController = async (req, res) => {
                 endDate,
                 description,
                 status,
-                progress
+                progress:updatedProgress
             },
             { new: true }  // Return updated task
         );
