@@ -15,7 +15,6 @@ taskServer.use(cors())
 taskServer.use(express.json())
 // use router
 taskServer.use(router)
-taskServer.use('/uploads',express.static('./uploads'))
 
 // port creation 
 const PORT =3000 || process.env.PORT;

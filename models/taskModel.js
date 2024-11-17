@@ -25,10 +25,6 @@ const taskSchema = new mongoose.Schema(
       required: true,
       enum: ["Not Yet Started", "Ongoing", "Completed", "Pending"],
     },
-    taskImg: {
-      type: String, // URL of the image or file path
-      default: null, // Optional
-    },
     userId: {
       type: String, // Reference to the User
       required: true,

@@ -9,7 +9,6 @@ exports.addTaskController = async(req,res)=>{
     // console.log(userId);
 
     const {title,startDate,endDate,description,status,progress} = req.body
-    const taskImg = req.file ? req.file.filename : null;
     // console.log(title,startDate,endDate,description,status,progress);
     try {
 
@@ -27,7 +26,6 @@ exports.addTaskController = async(req,res)=>{
             endDate,
             description,
             status,
-            taskImg,
             userId,
             progress,
         });
@@ -46,11 +44,14 @@ exports.editTaskController = async (req, res) => {
     console.log(`Inside editTaskController`);
     const { userId } = req;  // userId from the authenticated user
     const { id } = req.params;
-    const { title, startDate, endDate, description, status, taskImg, progress } = req.body;
-    const reuploadTaskImg = req.file ? req.file.filename : taskImg;
+    const { title, startDate, endDate, description, status, progress } = req.body;
 
     console.log("Task ID:", id);
     console.log("User ID:", userId);
+    // Check if progress is within valid range
+    if (progress < 0 || progress > 100) {
+        return res.status(400).json({ message: "Progress must be between 0 and 100" });
+    }
 
     try {
         console.log(`Request Body:`, req.body);
@@ -69,7 +70,6 @@ exports.editTaskController = async (req, res) => {
                 endDate,
                 description,
                 status,
-                taskImg: reuploadTaskImg,
                 progress
             },
             { new: true }  // Return updated task
