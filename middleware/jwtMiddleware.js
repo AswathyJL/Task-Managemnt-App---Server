@@ -10,13 +10,14 @@ const jwtMiddleware = (req,res,next) =>{
         try
         {
             const jwtResponse = jwt.verify(token,process.env.JWTPASSWORD)
-            console.log(jwtResponse);
+            console.log(`jwtResponse:`, jwtResponse);
             req.userId = jwtResponse.userId
              // next() - should be called if user is authorised
             next()
         }
         catch(err)
         {
+            console.error("JWT Verification Error:", err.message);
             res.status(401).json("Authorization failed... Please login!!")
 
         }

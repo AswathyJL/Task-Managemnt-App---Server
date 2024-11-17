@@ -2,11 +2,11 @@ const users = require('../models/userModel')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
-
+// register
 exports.registerController = async (req,res)=>{
     console.log("Inside Register Controller");
     console.log(req.body);
-    const {firstName, lastName, email, password, phone} = req.body
+    const {username, email, password} = req.body
     try {
         const existingUser = await users.findOne({email})
         if(existingUser)
@@ -20,11 +20,9 @@ exports.registerController = async (req,res)=>{
 
             // Create and save the new user
             const newUser = new users({
-                firstName,
-                lastName,
+                username,
                 email,
-                password: hashedPassword,
-                phone,
+                password: hashedPassword
             });
 
             await newUser.save();
@@ -37,6 +35,7 @@ exports.registerController = async (req,res)=>{
     }   
 }
 
+// login
 exports.loginController = async (req,res)=>{
     console.log(`Inside loginController`);
     console.log(req.body);
