@@ -90,9 +90,18 @@ exports.editTaskController = async (req, res) => {
 // to get all task - need authorisation
 exports.allTaskController = async(req,res)=>{
     console.log(`Inside allTaskController`);
+    const searchKey = req.query.search
+    console.log(searchKey);
+    const query = {
+        title:{
+            $regex:searchKey,
+            $options:'i'
+        }
+    }
+    
     try
     {
-        const allTasks = await tasks.find()
+        const allTasks = await tasks.find(query)
         res.status(200).json(allTasks)
     }
     catch(err)
